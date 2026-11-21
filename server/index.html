@@ -583,7 +583,7 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
             <label for="fNote">備註（選填）<textarea id="fNote" name="note"></textarea></label>
             <p class="err" id="formErr" role="alert"></p>
             <button class="btn" id="submitBtn" type="submit">送出訂單</button>
-            <p class="fine">這是專題展示用的訂購畫面，送出後不會實際扣款，訂單資料也不會傳送或儲存。</p>
+            <p class="fine">送出後訂單資料會記錄到我們的 Google 試算表，不會實際扣款。</p>
           </form>
         </div>
 
@@ -705,6 +705,8 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
       art:'<rect x="18" y="14" width="84" height="54" rx="3" fill="#E2D7AB" stroke="#8B6532" stroke-width="2"/><rect x="82" y="20" width="14" height="16" fill="#F5C518"/><path d="M60 20v42M66 44h30M66 52h30M26 30q12-10 24 2" stroke="#8B6532" stroke-width="1.5" fill="none"/>'}
   ];
   var SHIP = 60, qty = {};
+  /* 換成 Apps Script 部署後的網頁應用程式網址 */
+  var SHEET_URL = 'https://script.google.com/macros/s/AKfycbynGIC-1HIWshZxW21s2UXAAFWmRRiJOiHzsq8sp7oY6y5Hsu1N2wEcPQsoy9lMVkQszw/exec';
   var prodBox = document.getElementById('products');
   function money(n){ return 'NT$ ' + n.toLocaleString('en-US'); }
 
@@ -776,6 +778,36 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
       ['商品', t.lines.map(function(l){ return l.n + ' × ' + l.q; }).join('、')],
       ['總計', money(t.grand) + (t.ship ? '（含運費 ' + money(t.ship) + '）' : '')]];
     if(f.note.value.trim()) rows.push(['備註', f.note.value.trim()]);
+
+    /* 送到 Google 試算表：成功才顯示完成畫面 */
+    var isPost = f.ship.value === 'post';
+    var payload = {
+      orderNo: no,
+      date: d.getFullYear() + '/' + pad(d.getMonth()+1) + '/' + pad(d.getDate()),
+      time: pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()),
+      name: f.name.value.trim(),
+      phone: f.phone.value.replace(/[\s-]/g,''),
+      email: f.email.value.trim(),
+      ship: isPost ? '郵寄' : '校內面交',
+      addr: isPost ? f.addr.value.trim() : '',
+      items: t.lines.map(function(l){ return l.n + ' × ' + l.q; }).join('、'),
+      qty: PRODUCTS.reduce(function(o,p){ o[p.n] = qty[p.id]; return o; }, {}),
+      totalQty: t.lines.reduce(function(a,l){ return a + l.q; }, 0),
+      subtotal: t.sub, shipFee: t.ship, total: t.grand,
+      note: f.note.value.trim()
+    };
+    var btn = document.getElementById('submitBtn');
+    btn.disabled = true; btn.textContent = '送出中…';
+    fetch(SHEET_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload)})
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if(!res || !res.ok) throw new Error(res && res.error ? res.error : '試算表沒有回應');
+        showDone(rows);
+      })
+      .catch(function(x){ err.textContent = '送出失敗：' + (x && x.message ? x.message : '請檢查網路後再試一次'); })
+      .then(function(){ btn.disabled = false; btn.textContent = '送出訂單'; });
+  });
+  function showDone(rows){
     var dl = document.getElementById('doneList'); dl.innerHTML = '';
     rows.forEach(function(r){
       var dt = document.createElement('dt'), dd = document.createElement('dd');
@@ -784,7 +816,7 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
     document.getElementById('orderPane').style.display = 'none';
     document.getElementById('done').classList.add('show');
     document.getElementById('done').scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block:'center'});
-  });
+  }
   document.getElementById('againBtn').addEventListener('click', function(){
     PRODUCTS.forEach(function(p){ qty[p.id] = 0; });
     form.reset(); addrWrap.hidden = true; renderCart();
