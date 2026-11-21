@@ -578,9 +578,13 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
               <select id="fShip" name="ship">
                 <option value="pickup">校內面交（免運費）</option>
                 <option value="post">郵寄（運費 NT$ 60）</option>
+                <option value="seven">7-11 取貨（運費 NT$ 60）</option>
               </select>
             </label>
             <label for="fAddr" id="addrWrap" hidden>收件地址<input id="fAddr" name="addr" autocomplete="street-address"></label>
+            <label for="fStore" id="storeWrap" hidden>7-11 取貨門市<input id="fStore" name="store" placeholder="門市名稱或 6 碼店號，例如：鳳山門市">
+              <span class="fine"><a href="https://emap.pcsc.com.tw/" target="_blank" rel="noopener">開啟 7-11 電子地圖查門市 ↗</a></span>
+            </label>
             <label for="fNote">備註（選填）<textarea id="fNote" name="note"></textarea></label>
             <p class="err" id="formErr" role="alert"></p>
             <button class="btn" id="submitBtn" type="submit">送出訂單</button>
@@ -731,17 +735,23 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
     renderCart();
   });
 
-  var shipSel = document.getElementById('fShip'), addrWrap = document.getElementById('addrWrap');
-  shipSel.addEventListener('change', function(){
+  var shipSel = document.getElementById('fShip'), addrWrap = document.getElementById('addrWrap'), storeWrap = document.getElementById('storeWrap');
+  function syncShip(){
     addrWrap.hidden = shipSel.value !== 'post';
-    if(addrWrap.hidden){ var a = document.getElementById('fAddr'); a.value = ''; a.classList.remove('field-bad'); }
+    storeWrap.hidden = shipSel.value !== 'seven';
+    [[addrWrap,'fAddr'],[storeWrap,'fStore']].forEach(function(x){
+      if(x[0].hidden){ var el = document.getElementById(x[1]); el.value = ''; el.classList.remove('field-bad'); }
+    });
+  }
+  shipSel.addEventListener('change', function(){
+    syncShip();
     renderCart();
   });
 
   function totals(){
     var sub = 0, lines = [];
     PRODUCTS.forEach(function(p){ if(qty[p.id] > 0){ sub += qty[p.id] * p.p; lines.push({n:p.n, q:qty[p.id], a:qty[p.id] * p.p}); } });
-    var ship = (sub > 0 && shipSel.value === 'post') ? SHIP : 0;
+    var ship = (sub > 0 && shipSel.value !== 'pickup') ? SHIP : 0;
     return {sub:sub, ship:ship, grand:sub + ship, lines:lines};
   }
   function renderCart(){
@@ -766,26 +776,27 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
   form.addEventListener('submit', function(e){
     e.preventDefault();
     var t = totals(), f = form.elements, bad = null, msg = '';
-    ['fName','fPhone','fEmail','fAddr'].forEach(function(id){ document.getElementById(id).classList.remove('field-bad'); });
+    ['fName','fPhone','fEmail','fAddr','fStore'].forEach(function(id){ document.getElementById(id).classList.remove('field-bad'); });
     function fail(id, m){ if(!bad){ bad = document.getElementById(id); msg = m; } document.getElementById(id).classList.add('field-bad'); }
     if(!t.lines.length){ err.textContent = '請先在左邊選擇至少一項商品。'; return; }
     if(!f.name.value.trim()) fail('fName', '請填寫姓名。');
     if(!/^09\d{8}$/.test(f.phone.value.replace(/[\s-]/g,''))) fail('fPhone', '手機號碼格式不正確，請輸入 09 開頭的 10 位數字。');
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.value.trim())) fail('fEmail', 'Email 格式不正確，例如 name@example.com。');
     if(f.ship.value === 'post' && !f.addr.value.trim()) fail('fAddr', '選擇郵寄時請填寫收件地址。');
+    if(f.ship.value === 'seven' && !f.store.value.trim()) fail('fStore', '選擇 7-11 取貨時請填寫取貨門市。');
     if(bad){ err.textContent = msg; bad.focus(); return; }
     err.textContent = '';
 
     var d = new Date(), pad = function(n){ return String(n).padStart(2,'0'); };
     var no = 'PA' + d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '-' + String(Math.floor(Math.random()*9000)+1000);
     var rows = [['訂單編號', no], ['訂購人', f.name.value.trim()], ['手機', f.phone.value.trim()], ['Email', f.email.value.trim()],
-      ['取貨方式', f.ship.value === 'post' ? '郵寄：' + f.addr.value.trim() : '校內面交'],
+      ['取貨方式', f.ship.value === 'post' ? '郵寄：' + f.addr.value.trim() : f.ship.value === 'seven' ? '7-11 取貨：' + f.store.value.trim() : '校內面交'],
       ['商品', t.lines.map(function(l){ return l.n + ' × ' + l.q; }).join('、')],
       ['總計', money(t.grand) + (t.ship ? '（含運費 ' + money(t.ship) + '）' : '')]];
     if(f.note.value.trim()) rows.push(['備註', f.note.value.trim()]);
 
     /* 送到 Google 試算表：成功才顯示完成畫面 */
-    var isPost = f.ship.value === 'post';
+    var sv = f.ship.value;
     var payload = {
       orderNo: no,
       date: d.getFullYear() + '/' + pad(d.getMonth()+1) + '/' + pad(d.getDate()),
@@ -793,8 +804,8 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
       name: f.name.value.trim(),
       phone: f.phone.value.replace(/[\s-]/g,''),
       email: f.email.value.trim(),
-      ship: isPost ? '郵寄' : '校內面交',
-      addr: isPost ? f.addr.value.trim() : '',
+      ship: sv === 'post' ? '郵寄' : sv === 'seven' ? '7-11 取貨' : '校內面交',
+      addr: sv === 'post' ? f.addr.value.trim() : sv === 'seven' ? '7-11 ' + f.store.value.trim() : '',
       items: t.lines.map(function(l){ return l.n + ' × ' + l.q; }).join('、'),
       qty: PRODUCTS.reduce(function(o,p){ o[p.n] = qty[p.id]; return o; }, {}),
       totalQty: t.lines.reduce(function(a,l){ return a + l.q; }, 0),
@@ -824,7 +835,7 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
   }
   document.getElementById('againBtn').addEventListener('click', function(){
     PRODUCTS.forEach(function(p){ qty[p.id] = 0; });
-    form.reset(); addrWrap.hidden = true; renderCart();
+    form.reset(); syncShip(); renderCart();
     document.getElementById('done').classList.remove('show');
     document.getElementById('orderPane').style.display = '';
   });
