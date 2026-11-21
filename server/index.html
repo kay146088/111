@@ -199,6 +199,7 @@ td small{display:block;color:var(--muted)}
 .sum.total{font-weight:700;font-size:1.2rem;color:var(--ink);font-family:var(--font-display)}
 form{display:grid;gap:12px;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
 label{font-weight:700;font-size:.92rem;display:grid;gap:4px}
+[hidden]{display:none!important}
 input,select,textarea{font:inherit;padding:10px 12px;border:1.5px solid #AEB8A4;border-radius:8px;background:#fff;color:var(--ink);width:100%}
 textarea{resize:vertical;min-height:64px}
 .err{color:#9B2C16;font-size:.88rem;font-weight:500;min-height:0}
@@ -731,7 +732,11 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
   });
 
   var shipSel = document.getElementById('fShip'), addrWrap = document.getElementById('addrWrap');
-  shipSel.addEventListener('change', function(){ addrWrap.hidden = shipSel.value !== 'post'; renderCart(); });
+  shipSel.addEventListener('change', function(){
+    addrWrap.hidden = shipSel.value !== 'post';
+    if(addrWrap.hidden){ var a = document.getElementById('fAddr'); a.value = ''; a.classList.remove('field-bad'); }
+    renderCart();
+  });
 
   function totals(){
     var sub = 0, lines = [];
