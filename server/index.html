@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>果皮變黃金 鳳梨果皮再生紙</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* 版面想法：一張「紙漿色」底的長頁，內容像紙張一樣一張張疊上去；金色只用在可以按的地方與重點數字。 */
+:root{
+  color-scheme: light;
+  --pulp:#FFFDF7;      /* 頁面底色：米白 */
+  --sheet:#FFFFFF;     /* 卡片表面 */
+  --ink:#1B4D2B;       /* 標題與深色區塊：深綠 */
+  --muted:#4F5E52;     /* 次要文字 */
+  --leaf:#2E7D32;      /* 鳳梨葉綠：導覽列、連結 */
+  --gold:#F5C518;      /* 鳳梨黃：按鈕與重點 */
+  --gold-hover:#E0A800;/* 金黃：滑鼠移上去 */
+  --peel:#8A6400;      /* 深金：小標文字 */
+  --yellow-light:#FFF6D6; /* 淺黃：區塊背景 */
+  --green-light:#E6F2E1;  /* 淺綠：次要區塊背景 */
+  --text:#333333;      /* 內文 */
+  --line:#E4E6D4;      /* 分隔線 */
+  --water:#9CC9D6;
+  --font-display:"LXGW WenKai TC","Noto Serif TC","PMingLiU",serif;
+  --font-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--pulp);color:var(--text);font-family:var(--font-body);font-size:16px;line-height:1.75}
+img{max-width:100%;display:block}
+h1,h2,h3{color:var(--ink);font-family:var(--font-display);text-wrap:balance;line-height:1.3;margin:0}
+h2{font-size:clamp(1.6rem,3.4vw,2.2rem)}
+h3{font-size:1.2rem}
+p{margin:0}
+a{color:var(--leaf)}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--leaf);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+section{padding:64px 0}
+.eyebrow{font-size:.85rem;letter-spacing:.14em;color:var(--peel);font-weight:700;margin-bottom:8px}
+.lead{color:var(--muted);max-width:40em;margin-top:12px}
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:12px 22px;font-weight:700;background:var(--gold);color:var(--ink);text-decoration:none}
+.btn:hover{background:var(--gold-hover)}
+.btn.ghost{background:#fff;color:var(--leaf);border:2px solid var(--leaf)}
+.btn.ghost:hover{background:var(--green-light)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* 導覽列 */
+header.nav{position:sticky;top:0;z-index:20;background:var(--leaf);box-shadow:0 2px 10px rgba(27,77,43,.18)}
+.nav :focus-visible{outline-color:var(--gold)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;flex-wrap:wrap}
+.brand{font-family:var(--font-display);font-weight:700;font-size:1.25rem;color:#fff;text-decoration:none;display:flex;align-items:center;gap:8px}
+.brand svg{width:28px;height:28px}
+.nav nav{display:flex;gap:4px;flex-wrap:wrap}
+.nav nav a{padding:8px 12px;border-radius:999px;color:#fff;text-decoration:none;font-weight:500;font-size:.95rem}
+.nav nav a:hover{background:rgba(255,255,255,.16)}
+.nav nav a.cta{background:var(--gold);color:var(--ink);font-weight:700}
+.nav nav a.cta:hover{background:var(--gold-hover)}
+
+/* 首頁 */
+.hero{padding:56px 0 48px;background:var(--yellow-light)}
+.hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);letter-spacing:.02em}
+.hero h1 em{font-style:normal;color:var(--leaf);background:linear-gradient(transparent 62%,rgba(245,197,24,.7) 62%)}
+.hero .sub{font-family:var(--font-display);font-size:clamp(1.1rem,2.2vw,1.4rem);margin-top:10px}
+.hero .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+.swatch{position:relative;border-radius:6px;overflow:hidden;box-shadow:0 14px 30px rgba(29,50,38,.18);transform:rotate(2deg);background:#D9CFA8;aspect-ratio:4/3}
+.swatch canvas{width:100%;height:100%;display:block}
+.swatch span{position:absolute;left:14px;bottom:12px;background:var(--sheet);padding:2px 10px;border-radius:4px;font-size:.8rem;color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+.fact b{display:block;font-family:var(--font-display);font-size:1.9rem;color:var(--leaf);font-variant-numeric:tabular-nums;line-height:1.2}
+.fact span{color:var(--muted);font-size:.92rem}
+
+/* 動機與目的 */
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+.cols .sheet h3{margin-bottom:6px}
+.cols .sheet p{color:var(--muted);font-size:.95rem}
+.goals{margin:28px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:12px 24px;counter-reset:g}
+.goals li{counter-increment:g;display:flex;gap:12px;align-items:flex-start}
+.goals li::before{content:counter(g);flex:none;width:30px;height:30px;border-radius:50%;background:var(--leaf);color:var(--sheet);display:grid;place-items:center;font-weight:700;font-size:.9rem;margin-top:2px}
+
+/* 研究流程 */
+.stages{list-style:none;margin:28px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stages li{background:var(--sheet);border:1px solid var(--line);border-top:5px solid var(--gold);border-radius:10px;padding:14px}
+.stages li.make{border-top-color:var(--leaf)}
+.stages small{color:var(--muted);font-weight:700}
+.stages h3{font-size:1.1rem;margin:2px 0 4px}
+.stages p{font-size:.9rem;color:var(--muted);line-height:1.6}
+.legend{display:flex;gap:18px;margin-top:14px;font-size:.88rem;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:14px;height:6px;border-radius:3px;margin-right:6px;vertical-align:middle}
+
+/* 實驗流程動畫 */
+#process{background:var(--ink);color:var(--sheet)}
+#process .eyebrow{color:var(--gold)}
+#process .lead{color:#C3CFC2}
+.player{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;margin-top:28px;align-items:stretch}
+.stage{background:var(--yellow-light);border-radius:var(--radius);overflow:hidden;position:relative}
+.stage svg{display:block;width:100%;height:auto}
+.scene{opacity:0;visibility:hidden;transition:opacity .5s}
+.scene.on{opacity:1;visibility:visible}
+.info{background:#245E33;border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:12px}
+.info .num{font-family:var(--font-display);color:var(--gold);font-size:1rem}
+.info h3{font-size:1.5rem;color:var(--sheet)}
+.info p{color:#E3EBE1;font-size:.97rem}
+.info figure{margin:auto 0 0;display:flex;gap:12px;align-items:center}
+.info figure img{width:96px;height:90px;object-fit:cover;border-radius:8px;border:2px solid var(--gold)}
+.info figcaption{font-size:.82rem;color:#CBD8CB}
+.controls{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+.steps{display:flex;gap:8px;flex:1;flex-wrap:wrap}
+.steps button{flex:1 1 110px;text-align:left;background:#245E33;color:#E3EBE1;border:2px solid transparent;border-radius:10px;padding:8px 12px;position:relative;overflow:hidden}
+.steps button b{display:block;font-size:.75rem;color:var(--gold)}
+.steps button[aria-current="step"]{border-color:var(--gold);color:var(--sheet)}
+.steps button .bar{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--gold)}
+.steps button[aria-current="step"] .bar.run{animation:fill var(--dur,6s) linear forwards}
+@keyframes fill{to{width:100%}}
+.ctl{background:var(--gold);color:var(--ink);border:0;border-radius:999px;padding:10px 18px;font-weight:700}
+.ctl:hover{background:var(--gold-hover)}
+
+/* 動畫元件 */
+@keyframes drip{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(70px);opacity:0}}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-7px) rotate(4deg)}}
+@keyframes rise{0%{transform:translateY(0) scale(.6);opacity:0}20%{opacity:.9}100%{transform:translateY(-58px) scale(1.1);opacity:0}}
+@keyframes steam{0%{transform:translateY(0);opacity:0}30%{opacity:.7}100%{transform:translateY(-60px);opacity:0}}
+@keyframes flame{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.25)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-1.6px)}75%{transform:translateX(1.6px)}}
+@keyframes spread{0%{transform:scaleX(.05)}60%,100%{transform:scaleX(1)}}
+@keyframes pour{0%{transform:rotate(0)}30%,70%{transform:rotate(-28deg)}100%{transform:rotate(0)}}
+@keyframes dry{0%{fill:#8E8358}100%{fill:#D8CFA3}}
+@keyframes press{0%,100%{transform:translateY(0)}50%{transform:translateY(16px)}}
+@keyframes blow{0%{transform:translateX(0);opacity:0}30%{opacity:.8}100%{transform:translateX(90px);opacity:0}}
+.a-drip{animation:drip 1.3s linear infinite}
+.a-bob{animation:bob 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.a-rise{animation:rise 1.8s ease-in infinite;transform-box:fill-box;transform-origin:center}
+.a-steam{animation:steam 2.6s ease-out infinite}
+.a-flame{animation:flame .5s ease-in-out infinite;transform-box:fill-box;transform-origin:bottom}
+.a-spin{animation:spin .7s linear infinite;transform-box:fill-box;transform-origin:center}
+.a-shake{animation:shake .14s linear infinite}
+.a-spread{animation:spread 5s ease-out infinite;transform-box:fill-box;transform-origin:left}
+.a-pour{animation:pour 5s ease-in-out infinite;transform-box:fill-box;transform-origin:left bottom}
+.a-dry{animation:dry 5s ease-in-out infinite alternate}
+.a-press{animation:press 2.2s ease-in-out infinite}
+.a-blow{animation:blow 1.4s linear infinite}
+.d1{animation-delay:.3s}.d2{animation-delay:.6s}.d3{animation-delay:.9s}.d4{animation-delay:1.2s}
+.scene:not(.on) *{animation-play-state:paused}
+.paused .scene *{animation-play-state:paused}
+.stage text{font-family:var(--font-body);fill:#1B4D2B}
+
+/* 實驗結果 */
+.tablebox{overflow-x:auto;margin-top:28px}
+table{border-collapse:collapse;width:100%;min-width:560px;background:var(--sheet);border-radius:var(--radius);overflow:hidden}
+th,td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{background:var(--ink);color:var(--sheet);font-family:var(--font-display);font-size:1.05rem}
+tbody th{font-weight:700;white-space:nowrap}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
+td small{display:block;color:var(--muted)}
+.pill{display:inline-block;padding:2px 12px;border-radius:999px;font-size:.88rem;font-weight:700}
+.pill.hi{background:var(--green-light);color:#1B4D2B}
+.pill.mid{background:#FCE79A;color:#5C4300}
+.pill.lo{background:#EBD3CB;color:#7A3220}
+.note{margin-top:16px;color:var(--muted);font-size:.92rem;max-width:46em}
+.findings{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
+.findings .sheet p{font-size:.95rem;color:var(--muted)}
+
+/* 行銷 */
+.fourp{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:28px}
+.fourp .sheet{padding:18px;background:var(--yellow-light);border-color:#F2E3A6}
+.fourp small{color:var(--peel);font-weight:700;letter-spacing:.08em}
+.fourp p{font-size:.93rem;color:var(--muted);margin-top:4px}
+.swot{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+.swot .sheet{padding:18px;background:var(--green-light);border-color:#CFE3C8}
+.swot ul{margin:6px 0 0;padding-left:1.2em;color:var(--muted);font-size:.93rem}
+
+/* 訂購 */
+#order{background:var(--green-light)}
+.shop{display:grid;grid-template-columns:1.25fr 1fr;gap:20px;margin-top:28px;align-items:start}
+.products{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.prod{background:var(--sheet);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:8px}
+.prod .art{border-radius:10px;background:var(--yellow-light);aspect-ratio:16/10;display:grid;place-items:center}
+.prod .art svg{width:70%;height:80%}
+.prod p{font-size:.9rem;color:var(--muted);line-height:1.55}
+.prod .row{display:flex;align-items:center;justify-content:space-between;margin-top:auto;gap:8px}
+.price{font-family:var(--font-display);font-size:1.25rem;font-variant-numeric:tabular-nums}
+.qty{display:flex;align-items:center;border:2px solid var(--ink);border-radius:999px;overflow:hidden}
+.qty button{width:36px;height:36px;border:0;background:transparent;font-size:1.2rem;font-weight:700;color:var(--ink)}
+.qty button:hover{background:var(--gold)}
+.qty output{min-width:28px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.checkout{position:sticky;top:76px}
+.checkout h3{margin-bottom:10px}
+#cartList{list-style:none;margin:0;padding:0}
+#cartList li{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);font-variant-numeric:tabular-nums}
+#cartEmpty{color:var(--muted);font-size:.93rem}
+.sum{display:flex;justify-content:space-between;padding-top:8px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.sum.total{font-weight:700;font-size:1.2rem;color:var(--ink);font-family:var(--font-display)}
+form{display:grid;gap:12px;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+label{font-weight:700;font-size:.92rem;display:grid;gap:4px}
+input,select,textarea{font:inherit;padding:10px 12px;border:1.5px solid #AEB8A4;border-radius:8px;background:#fff;color:var(--ink);width:100%}
+textarea{resize:vertical;min-height:64px}
+.err{color:#9B2C16;font-size:.88rem;font-weight:500;min-height:0}
+.field-bad{border-color:#9B2C16}
+.fine{font-size:.82rem;color:var(--muted)}
+#done{display:none;text-align:center;padding:12px 0}
+#done.show{display:block}
+#done svg{width:64px;height:64px}
+#done dl{text-align:left;margin:16px 0;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:.95rem}
+#done dt{color:var(--muted)}
+#done dd{margin:0;font-variant-numeric:tabular-nums}
+
+footer{padding:40px 0;background:var(--ink);color:#D5E0D4;font-size:.92rem}
+footer .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
+
+@media (max-width:860px){
+  .hero .wrap,.player,.shop{grid-template-columns:1fr}
+  .cols,.findings{grid-template-columns:1fr}
+  .stages,.fourp{grid-template-columns:repeat(2,1fr)}
+  .goals{grid-template-columns:1fr}
+  .checkout{position:static}
+  section{padding:48px 0}
+}
+@media (max-width:480px){
+  .products,.swot,.facts{grid-template-columns:1fr}
+  .stages,.fourp{grid-template-columns:1fr}
+  .nav nav a{padding:6px 9px;font-size:.88rem}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .stage *{animation:none!important}
+  .steps button .bar{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" data-go="top">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2l2 6 4-4-1 6 5-2-4 6H10L6 8l5 2-1-6 4 4z" fill="#A5D6A7"/><ellipse cx="16" cy="21" rx="8" ry="10" fill="#F5C518"/><path d="M10 16l12 10M22 16L10 26M9 21h14" stroke="#B88A00" stroke-width="1.2" fill="none"/></svg>
+      果皮變黃金
+    </a>
+    <nav aria-label="主選單">
+      <a href="#about" data-go="about">研究動機</a>
+      <a href="#flow" data-go="flow">研究流程</a>
+      <a href="#process" data-go="process">製作動畫</a>
+      <a href="#results" data-go="results">實驗結果</a>
+      <a href="#market" data-go="market">行銷分析</a>
+      <a class="cta" href="#order" data-go="order">訂購</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">農業剩餘資源再利用與環保文創產品開發</p>
+      <h1>果皮變<em>黃金</em></h1>
+      <p class="sub">鳳梨果皮纖維再生紙製程改良與創新產品開發</p>
+      <p class="lead">我們把鳳梨店家削下來的果皮，和回收紙一起打成紙漿，做成帶有天然纖維紋理的再生紙，再製成杯墊、書籤與明信片。</p>
+      <div class="actions">
+        <a class="btn" href="#process" data-go="process">看製作流程動畫</a>
+        <a class="btn ghost" href="#order" data-go="order">訂購產品</a>
+      </div>
+    </div>
+    <div class="swatch" aria-hidden="true">
+      <canvas id="paper" width="560" height="420"></canvas>
+      <span>鳳梨果皮再生紙 樣張示意</span>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="facts">
+      <div class="fact sheet"><b>400～500 顆</b><span>受訪店家產季每日鳳梨銷售量，淡季約 100 顆</span></div>
+      <div class="fact sheet"><b>5 個步驟</b><span>從果皮到再生紙：備料、煮製、打漿、抄紙、乾燥</span></div>
+      <div class="fact sheet"><b>3 種乾燥方式</b><span>吹風機、烤箱、自然日曬，比較時間、表面與韌性</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="wrap">
+    <p class="eyebrow">研究動機與目的</p>
+    <h2>果皮除了當飼料，還能變成什麼？</h2>
+    <p class="lead">115 年 10 月 24 日我們實地訪談鳳梨販售店家，發現果皮通常免費提供給養殖業者當飼料，或交給黑水虻利用。果皮取得容易，也已有再利用方式，我們想再往前一步，把它變成附加價值更高的材料。</p>
+    <div class="cols">
+      <div class="sheet"><h3>農業剩餘資源再利用</h3><p>鳳梨果皮具有再利用的可能，我們想探索更多元的應用方式。</p></div>
+      <div class="sheet"><h3>環保材料開發</h3><p>把鳳梨果皮與回收紙張結合，製作具有特色的再生紙。</p></div>
+      <div class="sheet"><h3>產品創新與商業應用</h3><p>把再生紙做成杯墊、書籤等實用商品，提升農業剩餘資源的附加價值。</p></div>
+    </div>
+    <ol class="goals">
+      <li>調查鳳梨店家的銷售情況及果皮處理方式，了解果皮再利用現況。</li>
+      <li>利用鳳梨果皮與回收紙張製作再生紙，建立可行的製作流程。</li>
+      <li>比較不同製作條件對再生紙品質的影響，找出適合的製作方式。</li>
+      <li>開發環保文創商品，並透過成本分析及消費者調查評估市場潛力。</li>
+    </ol>
+  </div>
+</section>
+
+<section id="flow" style="padding-top:0">
+  <div class="wrap">
+    <p class="eyebrow">研究流程</p>
+    <h2>七個階段，從發現問題到成果分析</h2>
+    <ol class="stages">
+      <li><small>第一階段</small><h3>發現問題</h3><p>了解鳳梨果皮的產生情況及現有處理方式。</p></li>
+      <li><small>第二階段</small><h3>資料蒐集</h3><p>蒐集植物纖維、再生紙及環保材料等相關資料。</p></li>
+      <li><small>第三階段</small><h3>實地訪談</h3><p>走訪鳳梨店家，了解產業現況及原料取得方式。</p></li>
+      <li class="make"><small>第四階段</small><h3>材料製作</h3><p>收集鳳梨果皮，進行清洗、煮製、打漿及抄紙。</p></li>
+      <li class="make"><small>第五階段</small><h3>實驗比較</h3><p>比較不同原料比例、製作條件及乾燥方式。</p></li>
+      <li class="make"><small>第六階段</small><h3>產品開發</h3><p>將品質較佳的再生紙製作成杯墊等環保商品。</p></li>
+      <li class="make"><small>第七階段</small><h3>成果分析</h3><p>進行產品測試、成本分析及市場調查。</p></li>
+    </ol>
+    <div class="legend"><span><i style="background:var(--peel)"></i>探究調查（第一～三階段）</span><span><i style="background:var(--leaf)"></i>實作開發（第四～七階段）</span></div>
+  </div>
+</section>
+
+<section id="process">
+  <div class="wrap">
+    <p class="eyebrow">實驗流程動畫</p>
+    <h2>鳳梨果皮再生紙是這樣做出來的</h2>
+    <p class="lead">動畫會自動依序播放五個步驟，也可以直接點下方的步驟切換。右側小圖是我們實驗時拍的照片。</p>
+
+    <div class="player" id="player">
+      <div class="stage" id="stage">
+        <svg viewBox="0 0 600 340" role="img" aria-labelledby="sceneTitle">
+          <title id="sceneTitle">製作流程動畫</title>
+
+          <!-- 步驟一：原料準備 -->
+          <g class="scene on" data-scene="0">
+            <rect x="0" y="250" width="600" height="90" fill="#D9D3B4"/>
+            <!-- 水龍頭 -->
+            <path d="M250 40h60v22h-22v28h-16V62h-22z" fill="#8FA39A"/>
+            <rect x="262" y="90" width="20" height="8" rx="3" fill="#6F857C"/>
+            <circle class="a-drip" cx="272" cy="104" r="5" fill="#9CC9D6"/>
+            <circle class="a-drip d2" cx="266" cy="104" r="4" fill="#9CC9D6"/>
+            <circle class="a-drip d4" cx="278" cy="104" r="4" fill="#9CC9D6"/>
+            <!-- 水盆 -->
+            <path d="M150 180h250l-24 84H174z" fill="#5E86A0"/>
+            <path d="M158 190h234l-4 14H162z" fill="#9CC9D6"/>
+            <g class="a-bob"><path d="M190 186l34-8 8 20-34 8z" fill="#C98F1E"/><path d="M196 190l24-6M199 198l24-6" stroke="#8B6532" stroke-width="2"/></g>
+            <g class="a-bob d2"><path d="M256 182l36 4-4 20-36-4z" fill="#D9A21E"/><path d="M262 188l24 3M260 196l24 3" stroke="#8B6532" stroke-width="2"/></g>
+            <g class="a-bob d4"><path d="M318 180l34-6 6 20-34 6z" fill="#B8801A"/><path d="M324 184l24-4M326 192l24-4" stroke="#8B6532" stroke-width="2"/></g>
+            <!-- 回收紙 -->
+            <g>
+              <rect x="444" y="212" width="110" height="12" fill="#EDEDE6" stroke="#B9B9AC"/>
+              <rect x="440" y="224" width="110" height="12" fill="#F7F7F0" stroke="#B9B9AC"/>
+              <rect x="446" y="236" width="110" height="14" fill="#E6E6DC" stroke="#B9B9AC"/>
+              <text x="499" y="204" text-anchor="middle" font-size="15">回收紙張</text>
+            </g>
+            <text x="92" y="236" text-anchor="middle" font-size="15">清洗果皮</text>
+            <path d="M118 226l28-14" stroke="#1D3226" stroke-width="1.5"/>
+          </g>
+
+          <!-- 步驟二：果皮煮製 -->
+          <g class="scene" data-scene="1">
+            <rect x="0" y="270" width="600" height="70" fill="#D9D3B4"/>
+            <rect x="190" y="252" width="220" height="20" rx="4" fill="#4A4F4B"/>
+            <g fill="#F08A24">
+              <path class="a-flame" d="M230 252c-8-12 4-16 0-28 12 8 14 18 8 28z"/>
+              <path class="a-flame d1" d="M270 252c-8-12 4-16 0-28 12 8 14 18 8 28z"/>
+              <path class="a-flame d2" d="M310 252c-8-12 4-16 0-28 12 8 14 18 8 28z"/>
+              <path class="a-flame d3" d="M350 252c-8-12 4-16 0-28 12 8 14 18 8 28z"/>
+            </g>
+            <!-- 鍋子 -->
+            <rect x="160" y="150" width="30" height="12" rx="6" fill="#7C8A86"/>
+            <rect x="410" y="150" width="30" height="12" rx="6" fill="#7C8A86"/>
+            <path d="M186 130h228v70q0 24-24 24H210q-24 0-24-24z" fill="#9AA8A4"/>
+            <path d="M194 138h212v14H194z" fill="#6B4A1E"/>
+            <path d="M210 140l22 8M250 150l24-8M300 140l22 8M350 150l24-8" stroke="#D9A21E" stroke-width="6" stroke-linecap="round"/>
+            <g fill="#F4F1DF" opacity=".9">
+              <circle class="a-rise" cx="230" cy="140" r="6"/>
+              <circle class="a-rise d2" cx="280" cy="142" r="8"/>
+              <circle class="a-rise d1" cx="330" cy="140" r="5"/>
+              <circle class="a-rise d3" cx="376" cy="142" r="7"/>
+            </g>
+            <g fill="none" stroke="#A9B4AE" stroke-width="5" stroke-linecap="round">
+              <path class="a-steam" d="M250 110q-10-12 0-24t0-24"/>
+              <path class="a-steam d2" d="M300 108q-10-12 0-24t0-24"/>
+              <path class="a-steam d4" d="M350 110q-10-12 0-24t0-24"/>
+            </g>
+            <!-- 小蘇打 -->
+            <g>
+              <rect x="470" y="190" width="64" height="80" rx="6" fill="#FBFBF5" stroke="#8B6532" stroke-width="2"/>
+              <rect x="470" y="208" width="64" height="26" fill="#F5C518"/>
+              <text x="502" y="226" text-anchor="middle" font-size="13" font-weight="700">小蘇打</text>
+            </g>
+            <text x="88" y="196" text-anchor="middle" font-size="15">加熱軟化</text>
+            <path d="M124 190h34" stroke="#1D3226" stroke-width="1.5"/>
+          </g>
+
+          <!-- 步驟三：紙漿製作 -->
+          <g class="scene" data-scene="2">
+            <rect x="0" y="280" width="600" height="60" fill="#D9D3B4"/>
+            <g class="a-shake">
+              <rect x="236" y="232" width="128" height="50" rx="10" fill="#EDEDE6" stroke="#9AA8A4" stroke-width="2"/>
+              <circle cx="300" cy="258" r="11" fill="#C24A2A"/>
+              <rect x="246" y="60" width="108" height="14" rx="5" fill="#4A4F4B"/>
+              <path d="M240 74h120l-16 158h-88z" fill="#DCEBEA" stroke="#9AA8A4" stroke-width="2"/>
+              <path d="M247 120h106l-11 108h-84z" fill="#A99A5E"/>
+              <g class="a-spin">
+                <ellipse cx="300" cy="174" rx="40" ry="34" fill="#B8A869"/>
+                <path d="M270 160q30-22 58 4" stroke="#F5C518" stroke-width="7" fill="none" stroke-linecap="round"/>
+                <path d="M330 190q-30 22-58-4" stroke="#F7F7F0" stroke-width="7" fill="none" stroke-linecap="round"/>
+                <rect x="284" y="150" width="14" height="10" fill="#F7F7F0"/>
+                <rect x="308" y="186" width="12" height="9" fill="#8B6532"/>
+              </g>
+              <path d="M360 100h34q10 0 10 10v60q0 10-10 10h-40" fill="none" stroke="#9AA8A4" stroke-width="8"/>
+            </g>
+            <text x="112" y="150" text-anchor="middle" font-size="15">煮軟的果皮</text>
+            <text x="112" y="172" text-anchor="middle" font-size="15">＋回收紙</text>
+            <path d="M160 160h78" stroke="#1D3226" stroke-width="1.5"/>
+            <text x="498" y="236" text-anchor="middle" font-size="15">打成紙漿</text>
+          </g>
+
+          <!-- 步驟四：抄紙成形 -->
+          <g class="scene" data-scene="3">
+            <rect x="0" y="290" width="600" height="50" fill="#D9D3B4"/>
+            <!-- 水槽 -->
+            <path d="M110 220h380l-18 72H128z" fill="#5E86A0"/>
+            <path d="M116 228h368l-3 12H119z" fill="#9CC9D6"/>
+            <!-- 抄紙框 -->
+            <rect x="150" y="150" width="300" height="26" fill="#C9933B" stroke="#8B6532" stroke-width="3"/>
+            <path d="M158 163h284" stroke="#F4F1DF" stroke-width="2" stroke-dasharray="3 5"/>
+            <rect class="a-spread" x="156" y="142" width="288" height="12" rx="5" fill="#A99A5E"/>
+            <g fill="#9CC9D6">
+              <circle class="a-drip" cx="190" cy="182" r="4"/>
+              <circle class="a-drip d1" cx="240" cy="182" r="4"/>
+              <circle class="a-drip d3" cx="300" cy="182" r="4"/>
+              <circle class="a-drip d2" cx="360" cy="182" r="4"/>
+              <circle class="a-drip d4" cx="410" cy="182" r="4"/>
+            </g>
+            <!-- 倒紙漿的杯子 -->
+            <g class="a-pour">
+              <path d="M92 70h56l-8 62H100z" fill="#DCEBEA" stroke="#9AA8A4" stroke-width="2"/>
+              <path d="M97 96h46l-5 34h-36z" fill="#A99A5E"/>
+            </g>
+            <text x="300" y="118" text-anchor="middle" font-size="15">紙漿均勻倒入抄紙框</text>
+            <text x="520" y="206" text-anchor="middle" font-size="15">濾水</text>
+          </g>
+
+          <!-- 步驟五：壓水與乾燥 -->
+          <g class="scene" data-scene="4">
+            <rect x="0" y="270" width="600" height="70" fill="#D9D3B4"/>
+            <!-- 太陽 -->
+            <g>
+              <g class="a-spin" style="animation-duration:14s" stroke="#F5C518" stroke-width="6" stroke-linecap="round">
+                <path d="M500 22v16M500 102v16M452 70h16M532 70h16M466 36l11 11M523 93l11 11M534 36l-11 11M477 93l-11 11"/>
+                <circle cx="500" cy="70" r="6" fill="none" stroke="none"/>
+              </g>
+              <circle cx="500" cy="70" r="24" fill="#F5C518"/>
+            </g>
+            <!-- 壓水海綿 -->
+            <g class="a-press">
+              <rect x="210" y="150" width="180" height="26" rx="8" fill="#E9C24B"/>
+              <rect x="280" y="124" width="40" height="28" rx="6" fill="#8B6532"/>
+            </g>
+            <!-- 紙 -->
+            <rect class="a-dry" x="170" y="200" width="260" height="20" rx="3" fill="#8E8358"/>
+            <rect x="150" y="220" width="300" height="12" fill="#C9933B"/>
+            <g fill="#9CC9D6">
+              <circle class="a-drip" cx="200" cy="236" r="4"/>
+              <circle class="a-drip d2" cx="300" cy="236" r="4"/>
+              <circle class="a-drip d4" cx="400" cy="236" r="4"/>
+            </g>
+            <!-- 吹風機 -->
+            <g>
+              <path d="M40 180h70v40H40q-16 0-16-20t16-20z" fill="#5E86A0"/>
+              <rect x="56" y="216" width="22" height="46" rx="6" fill="#3E5F75"/>
+              <g stroke="#9AA8A4" stroke-width="4" stroke-linecap="round">
+                <path class="a-blow" d="M116 190h22"/>
+                <path class="a-blow d1" d="M116 200h22"/>
+                <path class="a-blow d2" d="M116 210h22"/>
+              </g>
+            </g>
+            <text x="70" y="160" text-anchor="middle" font-size="14">吹風機</text>
+            <text x="500" y="136" text-anchor="middle" font-size="14">自然日曬</text>
+            <g>
+              <rect x="470" y="186" width="96" height="70" rx="8" fill="#4A4F4B"/>
+              <rect x="480" y="196" width="60" height="50" rx="4" fill="#F08A24" opacity=".85"/>
+              <circle cx="553" cy="206" r="5" fill="#EDEDE6"/><circle cx="553" cy="226" r="5" fill="#EDEDE6"/>
+              <text x="518" y="176" text-anchor="middle" font-size="14">烤箱</text>
+            </g>
+            <text x="300" y="104" text-anchor="middle" font-size="15">先壓水，再乾燥</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="info" aria-live="polite">
+        <span class="num" id="stepNum">步驟一</span>
+        <h3 id="stepTitle">原料準備</h3>
+        <p id="stepDesc">收集鳳梨果皮，清洗並去除多餘果肉及雜質，同時準備回收紙張。</p>
+        <figure>
+          <img id="stepImg" src="img/step1.png" alt="實驗照片：原料準備" width="207" height="196">
+          <figcaption id="stepCap">實驗照片：從店家取得的鳳梨果皮</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="ctl" id="playBtn" type="button" aria-pressed="true">暫停</button>
+      <div class="steps" id="stepBtns"></div>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <p class="eyebrow">實驗結果</p>
+    <h2>三種乾燥方式，哪一種最適合？</h2>
+    <p class="lead">我們用吹風機、烤箱與自然日曬乾燥同一批紙漿做的紙，比較乾燥時間、表面光滑度與韌性。</p>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th scope="col">比較項目</th><th scope="col">A 組 吹風機</th><th scope="col">B 組 烤箱</th><th scope="col">C 組 自然日曬</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">乾燥時間</th><td>1 小時 13 分鐘<small>中等熱風</small></td><td>1 小時<small>190 度，只烤上層</small></td><td>1 天 13 小時<small>期間無下雨</small></td></tr>
+          <tr><th scope="row">表面光滑度</th><td><span class="pill lo">最粗糙</span></td><td><span class="pill hi">最光滑</span></td><td><span class="pill mid">較光滑</span></td></tr>
+          <tr><th scope="row">韌性</th><td><span class="pill mid">中等</span></td><td><span class="pill lo">最小</span></td><td><span class="pill hi">最大</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="findings">
+      <div class="sheet"><h3>吹風機</h3><p>乾燥速度較快，但紙張表面較粗糙，表面仍有改善空間。</p></div>
+      <div class="sheet"><h3>烤箱</h3><p>乾燥後的紙張表面最光滑，但韌性表現較差。</p></div>
+      <div class="sheet"><h3>自然日曬</h3><p>紙張韌性表現最好，但乾燥時間最長。</p></div>
+    </div>
+    <p class="note">韌性目前以觀察方式判斷，尚缺乏量化測試，以上屬於初步實驗觀察。後續會調整果皮與回收紙漿的比例，並增加強度、吸水性及耐用性測試。</p>
+  </div>
+</section>
+
+<section id="market" style="padding-top:0">
+  <div class="wrap">
+    <p class="eyebrow">行銷分析</p>
+    <h2>轉廢為寶的環保文創商品</h2>
+    <p class="lead">產品定位：以在地鳳梨果皮為原料，結合再生紙張製作的環保文創商品。主要目標是學校及環境教育單位，其次是文創商品消費者，觀光紀念品則是有潛力的市場。</p>
+    <div class="fourp">
+      <div class="sheet"><small>PRODUCT 產品</small><p>鳳梨纖維環保杯墊、書籤及明信片。</p></div>
+      <div class="sheet"><small>PRICE 價格</small><p>依照材料、製作工時、能源及包裝成本，評估合理售價。</p></div>
+      <div class="sheet"><small>PLACE 通路</small><p>學校活動、地方文創市集、觀光據點及網路平台。</p></div>
+      <div class="sheet"><small>PROMOTION 推廣</small><p>短影音、產品故事介紹、環保教育活動及體驗活動。</p></div>
+    </div>
+    <div class="swot">
+      <div class="sheet"><h3>優勢 Strength</h3><ul><li>原料成本低</li><li>鳳梨纖維較佳</li><li>原料易取得</li></ul></div>
+      <div class="sheet"><h3>劣勢 Weakness</h3><ul><li>製作時間長</li><li>紙張厚薄不均</li><li>量產技術不足</li><li>耐水性與防霉處理尚待考驗</li></ul></div>
+      <div class="sheet"><h3>機會 Opportunities</h3><ul><li>全球減塑與禁塑政策</li><li>全民環保意識抬頭</li><li>環保教育發展迅速</li><li>可結合文創市集、校園活動推廣</li></ul></div>
+      <div class="sheet"><h3>威脅 Threat</h3><ul><li>氣候變化使鳳梨纖維品質不穩定</li><li>同市場競爭激烈</li><li>可能受到蟲害等天災影響</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section id="order">
+  <div class="wrap">
+    <p class="eyebrow">訂購</p>
+    <h2>把鳳梨再生紙帶回家</h2>
+    <p class="lead">選好數量後填寫資料即可送出。每一張紙都是手工抄製，紋理與顏色會略有不同。價格為暫定示範價。</p>
+
+    <div class="shop">
+      <div class="products" id="products"></div>
+
+      <aside class="sheet checkout" aria-label="訂單">
+        <div id="orderPane">
+          <h3>你的訂單</h3>
+          <p id="cartEmpty">還沒有選擇商品。請在左邊按 ＋ 加入。</p>
+          <ul id="cartList"></ul>
+          <div class="sum"><span>小計</span><span id="subTotal">NT$ 0</span></div>
+          <div class="sum"><span>運費</span><span id="shipFee">NT$ 0</span></div>
+          <div class="sum total"><span>總計</span><span id="grand">NT$ 0</span></div>
+
+          <form id="orderForm" novalidate>
+            <label for="fName">姓名<input id="fName" name="name" autocomplete="name" required></label>
+            <label for="fPhone">手機號碼<input id="fPhone" name="phone" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxx" required></label>
+            <label for="fEmail">Email<input id="fEmail" name="email" type="email" autocomplete="email" placeholder="name@example.com" required></label>
+            <label for="fShip">取貨方式
+              <select id="fShip" name="ship">
+                <option value="pickup">校內面交（免運費）</option>
+                <option value="post">郵寄（運費 NT$ 60）</option>
+              </select>
+            </label>
+            <label for="fAddr" id="addrWrap" hidden>收件地址<input id="fAddr" name="addr" autocomplete="street-address"></label>
+            <label for="fNote">備註（選填）<textarea id="fNote" name="note"></textarea></label>
+            <p class="err" id="formErr" role="alert"></p>
+            <button class="btn" id="submitBtn" type="submit">送出訂單</button>
+            <p class="fine">這是專題展示用的訂購畫面，送出後不會實際扣款，訂單資料也不會傳送或儲存。</p>
+          </form>
+        </div>
+
+        <div id="done" role="status">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#2E7D32"/><path d="M18 33l10 10 18-22" fill="none" stroke="#FBFBF5" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <h3>訂單已送出，謝謝你！</h3>
+          <dl id="doneList"></dl>
+          <button class="btn ghost" id="againBtn" type="button">再訂一筆</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div><b>果皮變黃金</b><br>鳳梨果皮纖維再生紙製程改良與創新產品開發</div>
+    <div>第二組<br>組長：張英智<br>組員：何忻美、李思亭、劉子玥</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* 導覽：平滑捲動到區塊 */
+  document.querySelectorAll('[data-go]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      var el = document.getElementById(a.getAttribute('data-go'));
+      if(!el) return;
+      e.preventDefault();
+      el.scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block:'start'});
+    });
+  });
+
+  /* 首頁紙張樣張：用 Canvas 畫出纖維紋理 */
+  (function(){
+    var c = document.getElementById('paper'); if(!c || !c.getContext) return;
+    var g = c.getContext('2d'), w = c.width, h = c.height, s = 7;
+    function r(){ s = (s * 16807) % 2147483647; return s / 2147483647; }
+    g.fillStyle = '#D9CFA8'; g.fillRect(0,0,w,h);
+    for(var i=0;i<2600;i++){
+      g.fillStyle = 'rgba(' + (120+r()*60|0) + ',' + (100+r()*50|0) + ',' + (50+r()*40|0) + ',' + (0.05+r()*0.12) + ')';
+      g.fillRect(r()*w, r()*h, 1+r()*3, 1+r()*3);
+    }
+    var cols = ['rgba(139,101,50,.55)','rgba(227,164,22,.6)','rgba(70,95,60,.45)','rgba(251,251,245,.6)'];
+    for(var j=0;j<420;j++){
+      var x=r()*w, y=r()*h, a=r()*Math.PI*2, l=8+r()*38;
+      g.strokeStyle = cols[(r()*cols.length)|0]; g.lineWidth = .6 + r()*1.8;
+      g.beginPath(); g.moveTo(x,y);
+      g.quadraticCurveTo(x+Math.cos(a)*l/2+(r()-.5)*14, y+Math.sin(a)*l/2+(r()-.5)*14, x+Math.cos(a)*l, y+Math.sin(a)*l);
+      g.stroke();
+    }
+  })();
+
+  /* 實驗流程動畫 */
+  var STEPS = [
+    {t:'原料準備', d:'收集鳳梨果皮，清洗並去除多餘果肉及雜質，同時準備回收紙張。', c:'實驗照片：從店家取得的鳳梨果皮'},
+    {t:'果皮煮製', d:'將鳳梨果皮切成小塊，加入適量水及小蘇打粉加熱，使果皮軟化。', c:'實驗照片：鍋中煮製的果皮'},
+    {t:'紙漿製作', d:'果皮徹底煮軟後，和回收紙張一起放進果汁機打成紙漿。', c:'實驗照片：果汁機裡的果皮與紙張'},
+    {t:'抄紙成形', d:'將紙漿均勻倒入抄紙框，控制紙漿分布並進行濾水。', c:'實驗照片：在抄紙框上整平紙漿'},
+    {t:'壓水與乾燥', d:'將成形的紙張壓水，再用吹風機、烤箱或自然日曬等不同方式乾燥。', c:'實驗照片：乾燥後的鳳梨再生紙'}
+  ];
+  var NUM = ['一','二','三','四','五'], DUR = 6000;
+  var cur = 0, playing = !reduce, timer = null;
+  var scenes = document.querySelectorAll('.scene');
+  var btnBox = document.getElementById('stepBtns');
+  var playBtn = document.getElementById('playBtn');
+  var player = document.getElementById('player');
+
+  STEPS.forEach(function(st, i){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.innerHTML = '<b>步驟' + NUM[i] + '</b>' + st.t + '<span class="bar"></span>';
+    b.addEventListener('click', function(){ show(i); });
+    btnBox.appendChild(b);
+  });
+  var btns = btnBox.querySelectorAll('button');
+
+  function show(i){
+    cur = (i + STEPS.length) % STEPS.length;
+    scenes.forEach(function(s, k){ s.classList.toggle('on', k === cur); });
+    btns.forEach(function(b, k){
+      if(k === cur) b.setAttribute('aria-current','step'); else b.removeAttribute('aria-current');
+      var bar = b.querySelector('.bar'); bar.classList.remove('run');
+      if(k === cur && playing){ void bar.offsetWidth; bar.style.setProperty('--dur', DUR + 'ms'); bar.classList.add('run'); }
+    });
+    var st = STEPS[cur];
+    document.getElementById('stepNum').textContent = '步驟' + NUM[cur] + '／共五步';
+    document.getElementById('stepTitle').textContent = st.t;
+    document.getElementById('stepDesc').textContent = st.d;
+    var img = document.getElementById('stepImg');
+    img.src = 'img/step' + (cur + 1) + '.png'; img.alt = '實驗照片：' + st.t;
+    document.getElementById('stepCap').textContent = st.c;
+    clearTimeout(timer);
+    if(playing) timer = setTimeout(function(){ show(cur + 1); }, DUR);
+  }
+  function setPlaying(p){
+    playing = p;
+    playBtn.textContent = p ? '暫停' : '播放';
+    playBtn.setAttribute('aria-pressed', p ? 'true' : 'false');
+    player.classList.toggle('paused', !p);
+    show(cur);
+  }
+  playBtn.addEventListener('click', function(){ setPlaying(!playing); });
+  setPlaying(playing);
+
+  /* 訂購 */
+  var PRODUCTS = [
+    {id:'coaster', n:'鳳梨纖維環保杯墊', p:80, d:'直徑約 9 公分，單片。保留天然纖維紋理。',
+      art:'<circle cx="60" cy="40" r="32" fill="#CFC08A" stroke="#8B6532" stroke-width="2"/><path d="M40 30q10-8 20 2M62 52q12 6 18-8M44 50l10-6M70 28l6 8" stroke="#8B6532" stroke-width="1.5" fill="none"/><circle cx="52" cy="38" r="2" fill="#F5C518"/><circle cx="70" cy="46" r="2" fill="#2E7D32"/>'},
+    {id:'coaster4', n:'杯墊四入組', p:280, d:'四片一組，附再生紙包裝，適合送禮。',
+      art:'<circle cx="42" cy="46" r="24" fill="#BFAF78" stroke="#8B6532" stroke-width="2"/><circle cx="54" cy="40" r="24" fill="#CFC08A" stroke="#8B6532" stroke-width="2"/><circle cx="66" cy="36" r="24" fill="#D8CB99" stroke="#8B6532" stroke-width="2"/><circle cx="78" cy="32" r="24" fill="#E2D7AB" stroke="#8B6532" stroke-width="2"/>'},
+    {id:'bookmark', n:'鳳梨纖維書籤', p:40, d:'約 4 × 14 公分，附棉繩。',
+      art:'<rect x="46" y="6" width="28" height="68" rx="3" fill="#D8CB99" stroke="#8B6532" stroke-width="2"/><circle cx="60" cy="14" r="3" fill="#FBFBF5" stroke="#8B6532"/><path d="M60 11q14-10 8-6" stroke="#2E7D32" stroke-width="2" fill="none"/><path d="M52 30h16M52 40h16M52 50h10" stroke="#8B6532" stroke-width="1.5"/>'},
+    {id:'postcard', n:'鳳梨纖維明信片', p:50, d:'約 10 × 14.8 公分，可書寫與郵寄。',
+      art:'<rect x="18" y="14" width="84" height="54" rx="3" fill="#E2D7AB" stroke="#8B6532" stroke-width="2"/><rect x="82" y="20" width="14" height="16" fill="#F5C518"/><path d="M60 20v42M66 44h30M66 52h30M26 30q12-10 24 2" stroke="#8B6532" stroke-width="1.5" fill="none"/>'}
+  ];
+  var SHIP = 60, qty = {};
+  var prodBox = document.getElementById('products');
+  function money(n){ return 'NT$ ' + n.toLocaleString('en-US'); }
+
+  PRODUCTS.forEach(function(p){
+    qty[p.id] = 0;
+    var el = document.createElement('article');
+    el.className = 'prod';
+    el.innerHTML =
+      '<div class="art"><svg viewBox="0 0 120 80" aria-hidden="true">' + p.art + '</svg></div>' +
+      '<h3>' + p.n + '</h3><p>' + p.d + '</p>' +
+      '<div class="row"><span class="price">' + money(p.p) + '</span>' +
+      '<div class="qty"><button type="button" aria-label="減少 ' + p.n + '" data-id="' + p.id + '" data-d="-1">−</button>' +
+      '<output id="q-' + p.id + '" aria-label="' + p.n + ' 數量">0</output>' +
+      '<button type="button" aria-label="增加 ' + p.n + '" data-id="' + p.id + '" data-d="1">＋</button></div></div>';
+    prodBox.appendChild(el);
+  });
+  prodBox.addEventListener('click', function(e){
+    var b = e.target.closest('button[data-id]'); if(!b) return;
+    var id = b.getAttribute('data-id');
+    qty[id] = Math.max(0, Math.min(99, qty[id] + Number(b.getAttribute('data-d'))));
+    renderCart();
+  });
+
+  var shipSel = document.getElementById('fShip'), addrWrap = document.getElementById('addrWrap');
+  shipSel.addEventListener('change', function(){ addrWrap.hidden = shipSel.value !== 'post'; renderCart(); });
+
+  function totals(){
+    var sub = 0, lines = [];
+    PRODUCTS.forEach(function(p){ if(qty[p.id] > 0){ sub += qty[p.id] * p.p; lines.push({n:p.n, q:qty[p.id], a:qty[p.id] * p.p}); } });
+    var ship = (sub > 0 && shipSel.value === 'post') ? SHIP : 0;
+    return {sub:sub, ship:ship, grand:sub + ship, lines:lines};
+  }
+  function renderCart(){
+    var t = totals(), list = document.getElementById('cartList');
+    PRODUCTS.forEach(function(p){ document.getElementById('q-' + p.id).textContent = qty[p.id]; });
+    list.innerHTML = '';
+    t.lines.forEach(function(l){
+      var li = document.createElement('li');
+      li.innerHTML = '<span></span><span></span>';
+      li.firstChild.textContent = l.n + ' × ' + l.q;
+      li.lastChild.textContent = money(l.a);
+      list.appendChild(li);
+    });
+    document.getElementById('cartEmpty').style.display = t.lines.length ? 'none' : '';
+    document.getElementById('subTotal').textContent = money(t.sub);
+    document.getElementById('shipFee').textContent = money(t.ship);
+    document.getElementById('grand').textContent = money(t.grand);
+  }
+  renderCart();
+
+  var form = document.getElementById('orderForm'), err = document.getElementById('formErr');
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var t = totals(), f = form.elements, bad = null, msg = '';
+    ['fName','fPhone','fEmail','fAddr'].forEach(function(id){ document.getElementById(id).classList.remove('field-bad'); });
+    function fail(id, m){ if(!bad){ bad = document.getElementById(id); msg = m; } document.getElementById(id).classList.add('field-bad'); }
+    if(!t.lines.length){ err.textContent = '請先在左邊選擇至少一項商品。'; return; }
+    if(!f.name.value.trim()) fail('fName', '請填寫姓名。');
+    if(!/^09\d{8}$/.test(f.phone.value.replace(/[\s-]/g,''))) fail('fPhone', '手機號碼格式不正確，請輸入 09 開頭的 10 位數字。');
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.value.trim())) fail('fEmail', 'Email 格式不正確，例如 name@example.com。');
+    if(f.ship.value === 'post' && !f.addr.value.trim()) fail('fAddr', '選擇郵寄時請填寫收件地址。');
+    if(bad){ err.textContent = msg; bad.focus(); return; }
+    err.textContent = '';
+
+    var d = new Date(), pad = function(n){ return String(n).padStart(2,'0'); };
+    var no = 'PA' + d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '-' + String(Math.floor(Math.random()*9000)+1000);
+    var rows = [['訂單編號', no], ['訂購人', f.name.value.trim()], ['手機', f.phone.value.trim()], ['Email', f.email.value.trim()],
+      ['取貨方式', f.ship.value === 'post' ? '郵寄：' + f.addr.value.trim() : '校內面交'],
+      ['商品', t.lines.map(function(l){ return l.n + ' × ' + l.q; }).join('、')],
+      ['總計', money(t.grand) + (t.ship ? '（含運費 ' + money(t.ship) + '）' : '')]];
+    if(f.note.value.trim()) rows.push(['備註', f.note.value.trim()]);
+    var dl = document.getElementById('doneList'); dl.innerHTML = '';
+    rows.forEach(function(r){
+      var dt = document.createElement('dt'), dd = document.createElement('dd');
+      dt.textContent = r[0]; dd.textContent = r[1]; dl.appendChild(dt); dl.appendChild(dd);
+    });
+    document.getElementById('orderPane').style.display = 'none';
+    document.getElementById('done').classList.add('show');
+    document.getElementById('done').scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block:'center'});
+  });
+  document.getElementById('againBtn').addEventListener('click', function(){
+    PRODUCTS.forEach(function(p){ qty[p.id] = 0; });
+    form.reset(); addrWrap.hidden = true; renderCart();
+    document.getElementById('done').classList.remove('show');
+    document.getElementById('orderPane').style.display = '';
+  });
+})();
+</script>
+</body>
+</html>
