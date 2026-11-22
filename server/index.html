@@ -200,9 +200,6 @@ td small{display:block;color:var(--muted)}
 form{display:grid;gap:12px;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
 label{font-weight:700;font-size:.92rem;display:grid;gap:4px}
 [hidden]{display:none!important}
-.storebox{display:grid;gap:8px}
-.storebox .btn{justify-content:center}
-#fStore[readonly]{background:var(--yellow-light);cursor:default}
 input,select,textarea{font:inherit;padding:10px 12px;border:1.5px solid #AEB8A4;border-radius:8px;background:#fff;color:var(--ink);width:100%}
 textarea{resize:vertical;min-height:64px}
 .err{color:#9B2C16;font-size:.88rem;font-weight:500;min-height:0}
@@ -581,14 +578,9 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
               <select id="fShip" name="ship">
                 <option value="pickup">校內面交（免運費）</option>
                 <option value="post">郵寄（運費 NT$ 60）</option>
-                <option value="seven">7-11 取貨（運費 NT$ 60）</option>
               </select>
             </label>
             <label for="fAddr" id="addrWrap" hidden>收件地址<input id="fAddr" name="addr" autocomplete="street-address"></label>
-            <div id="storeWrap" class="storebox" hidden>
-              <label for="fStore">7-11 取貨門市<input id="fStore" name="store" readonly placeholder="請按下方按鈕選擇門市"></label>
-              <button class="btn ghost" id="pickStore" type="button">選擇 7-11 門市</button>
-            </div>
             <label for="fNote">備註（選填）<textarea id="fNote" name="note"></textarea></label>
             <p class="err" id="formErr" role="alert"></p>
             <button class="btn" id="submitBtn" type="submit">送出訂單</button>
@@ -739,23 +731,17 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
     renderCart();
   });
 
-  var shipSel = document.getElementById('fShip'), addrWrap = document.getElementById('addrWrap'), storeWrap = document.getElementById('storeWrap');
-  function syncShip(){
-    addrWrap.hidden = shipSel.value !== 'post';
-    storeWrap.hidden = shipSel.value !== 'seven';
-    [[addrWrap,'fAddr'],[storeWrap,'fStore']].forEach(function(x){
-      if(x[0].hidden){ var el = document.getElementById(x[1]); el.value = ''; el.classList.remove('field-bad'); }
-    });
-  }
+  var shipSel = document.getElementById('fShip'), addrWrap = document.getElementById('addrWrap');
   shipSel.addEventListener('change', function(){
-    syncShip();
+    addrWrap.hidden = shipSel.value !== 'post';
+    if(addrWrap.hidden){ var a = document.getElementById('fAddr'); a.value = ''; a.classList.remove('field-bad'); }
     renderCart();
   });
 
   function totals(){
     var sub = 0, lines = [];
     PRODUCTS.forEach(function(p){ if(qty[p.id] > 0){ sub += qty[p.id] * p.p; lines.push({n:p.n, q:qty[p.id], a:qty[p.id] * p.p}); } });
-    var ship = (sub > 0 && shipSel.value !== 'pickup') ? SHIP : 0;
+    var ship = (sub > 0 && shipSel.value === 'post') ? SHIP : 0;
     return {sub:sub, ship:ship, grand:sub + ship, lines:lines};
   }
   function renderCart(){
@@ -776,83 +762,30 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
   }
   renderCart();
 
-  /* 7-11 電子地圖：跳到綠界門市地圖，選完由 Apps Script 帶回來 */
-  var ECPAY = {
-    mapUrl: 'https://logistics-stage.ecpay.com.tw/Express/map', /* 正式：https://logistics.ecpay.com.tw/Express/map */
-    merchantId: '2000933',                                     /* 測試帳號；有綠界帳號後換成自己的 */
-    subType: 'UNIMARTC2C'
-  };
-  var DRAFT_KEY = 'pineappleOrderDraft';
-  document.getElementById('pickStore').addEventListener('click', function(){
-    var f = document.getElementById('orderForm').elements;
-    try {
-      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({
-        qty: qty, name: f.name.value, phone: f.phone.value, email: f.email.value, note: f.note.value
-      }));
-    } catch(e) {}
-    var fm = document.createElement('form');
-    fm.method = 'POST'; fm.action = ECPAY.mapUrl;
-    var data = {
-      MerchantID: ECPAY.merchantId,
-      MerchantTradeNo: 'M' + Date.now(),
-      LogisticsType: 'CVS',
-      LogisticsSubType: ECPAY.subType,
-      IsCollection: 'N',
-      ServerReplyURL: SHEET_URL,
-      Device: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? '1' : '0'
-    };
-    Object.keys(data).forEach(function(k){
-      var i = document.createElement('input'); i.type = 'hidden'; i.name = k; i.value = data[k]; fm.appendChild(i);
-    });
-    document.body.appendChild(fm); fm.submit();
-  });
-
-  /* 從門市地圖回來：還原剛剛填的資料並填入門市 */
-  (function(){
-    var q = new URLSearchParams(location.search);
-    if(!q.get('cvsId')) return;
-    var f = document.getElementById('orderForm').elements;
-    try {
-      var d = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || 'null');
-      if(d){
-        PRODUCTS.forEach(function(p){ if(d.qty && d.qty[p.id] >= 0) qty[p.id] = d.qty[p.id]; });
-        f.name.value = d.name || ''; f.phone.value = d.phone || ''; f.email.value = d.email || ''; f.note.value = d.note || '';
-      }
-    } catch(e) {}
-    shipSel.value = 'seven'; syncShip();
-    var label = (q.get('cvsName') || '7-11') + '（店號 ' + q.get('cvsId') + '）';
-    if(q.get('cvsAddr')) label += ' ' + q.get('cvsAddr');
-    document.getElementById('fStore').value = label;
-    renderCart();
-    history.replaceState(null, '', location.pathname + '#order');
-    setTimeout(function(){ document.getElementById('order').scrollIntoView({block:'start'}); }, 50);
-  })();
-
   var form = document.getElementById('orderForm'), err = document.getElementById('formErr');
   form.addEventListener('submit', function(e){
     e.preventDefault();
     var t = totals(), f = form.elements, bad = null, msg = '';
-    ['fName','fPhone','fEmail','fAddr','fStore','pickStore'].forEach(function(id){ document.getElementById(id).classList.remove('field-bad'); });
+    ['fName','fPhone','fEmail','fAddr'].forEach(function(id){ document.getElementById(id).classList.remove('field-bad'); });
     function fail(id, m){ if(!bad){ bad = document.getElementById(id); msg = m; } document.getElementById(id).classList.add('field-bad'); }
     if(!t.lines.length){ err.textContent = '請先在左邊選擇至少一項商品。'; return; }
     if(!f.name.value.trim()) fail('fName', '請填寫姓名。');
     if(!/^09\d{8}$/.test(f.phone.value.replace(/[\s-]/g,''))) fail('fPhone', '手機號碼格式不正確，請輸入 09 開頭的 10 位數字。');
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.value.trim())) fail('fEmail', 'Email 格式不正確，例如 name@example.com。');
     if(f.ship.value === 'post' && !f.addr.value.trim()) fail('fAddr', '選擇郵寄時請填寫收件地址。');
-    if(f.ship.value === 'seven' && !f.store.value.trim()) fail('pickStore', '選擇 7-11 取貨時請先選擇取貨門市。');
     if(bad){ err.textContent = msg; bad.focus(); return; }
     err.textContent = '';
 
     var d = new Date(), pad = function(n){ return String(n).padStart(2,'0'); };
     var no = 'PA' + d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '-' + String(Math.floor(Math.random()*9000)+1000);
     var rows = [['訂單編號', no], ['訂購人', f.name.value.trim()], ['手機', f.phone.value.trim()], ['Email', f.email.value.trim()],
-      ['取貨方式', f.ship.value === 'post' ? '郵寄：' + f.addr.value.trim() : f.ship.value === 'seven' ? '7-11 取貨：' + f.store.value.trim() : '校內面交'],
+      ['取貨方式', f.ship.value === 'post' ? '郵寄：' + f.addr.value.trim() : '校內面交'],
       ['商品', t.lines.map(function(l){ return l.n + ' × ' + l.q; }).join('、')],
       ['總計', money(t.grand) + (t.ship ? '（含運費 ' + money(t.ship) + '）' : '')]];
     if(f.note.value.trim()) rows.push(['備註', f.note.value.trim()]);
 
     /* 送到 Google 試算表：成功才顯示完成畫面 */
-    var sv = f.ship.value;
+    var isPost = f.ship.value === 'post';
     var payload = {
       orderNo: no,
       date: d.getFullYear() + '/' + pad(d.getMonth()+1) + '/' + pad(d.getDate()),
@@ -860,8 +793,8 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
       name: f.name.value.trim(),
       phone: f.phone.value.replace(/[\s-]/g,''),
       email: f.email.value.trim(),
-      ship: sv === 'post' ? '郵寄' : sv === 'seven' ? '7-11 取貨' : '校內面交',
-      addr: sv === 'post' ? f.addr.value.trim() : sv === 'seven' ? '7-11 ' + f.store.value.trim() : '',
+      ship: isPost ? '郵寄' : '校內面交',
+      addr: isPost ? f.addr.value.trim() : '',
       items: t.lines.map(function(l){ return l.n + ' × ' + l.q; }).join('、'),
       qty: PRODUCTS.reduce(function(o,p){ o[p.n] = qty[p.id]; return o; }, {}),
       totalQty: t.lines.reduce(function(a,l){ return a + l.q; }, 0),
@@ -891,7 +824,7 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
   }
   document.getElementById('againBtn').addEventListener('click', function(){
     PRODUCTS.forEach(function(p){ qty[p.id] = 0; });
-    form.reset(); syncShip(); renderCart();
+    form.reset(); addrWrap.hidden = true; renderCart();
     document.getElementById('done').classList.remove('show');
     document.getElementById('orderPane').style.display = '';
   });
