@@ -200,6 +200,7 @@ td small{display:block;color:var(--muted)}
 form{display:grid;gap:12px;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
 label{font-weight:700;font-size:.92rem;display:grid;gap:4px}
 [hidden]{display:none!important}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 input,select,textarea{font:inherit;padding:10px 12px;border:1.5px solid #AEB8A4;border-radius:8px;background:#fff;color:var(--ink);width:100%}
 textarea{resize:vertical;min-height:64px}
 .err{color:#9B2C16;font-size:.88rem;font-weight:500;min-height:0}
@@ -571,20 +572,21 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
           <div class="sum total"><span>總計</span><span id="grand">NT$ 0</span></div>
 
           <form id="orderForm" novalidate>
-            <label for="fName">姓名<input id="fName" name="name" autocomplete="name" required></label>
+            <label for="fName">姓名<input id="fName" name="name" maxlength="30" autocomplete="name" required></label>
             <label for="fPhone">手機號碼<input id="fPhone" name="phone" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxx" required></label>
-            <label for="fEmail">Email<input id="fEmail" name="email" type="email" autocomplete="email" placeholder="name@example.com" required></label>
+            <label for="fEmail">Email<input id="fEmail" name="email" maxlength="100" type="email" autocomplete="email" placeholder="name@example.com" required></label>
             <label for="fShip">取貨方式
               <select id="fShip" name="ship">
                 <option value="pickup">校內面交（免運費）</option>
                 <option value="post">郵寄（運費 NT$ 60）</option>
               </select>
             </label>
-            <label for="fAddr" id="addrWrap" hidden>收件地址<input id="fAddr" name="addr" autocomplete="street-address"></label>
-            <label for="fNote">備註（選填）<textarea id="fNote" name="note"></textarea></label>
+            <label for="fAddr" id="addrWrap" hidden>收件地址<input id="fAddr" name="addr" maxlength="120" autocomplete="street-address"></label>
+            <label for="fNote">備註（選填）<textarea id="fNote" name="note" maxlength="200"></textarea></label>
+            <div class="hp" aria-hidden="true"><label for="fWebsite">網站<input id="fWebsite" name="website" tabindex="-1" autocomplete="off"></label></div>
             <p class="err" id="formErr" role="alert"></p>
             <button class="btn" id="submitBtn" type="submit">送出訂單</button>
-            <p class="fine">送出後訂單資料會記錄到我們的 Google 試算表，不會實際扣款。</p>
+            <p class="fine">送出後訂單資料會記錄到我們的 Google 試算表，不會實際扣款。我們收集姓名、手機、Email 與地址，只用於聯絡你、處理與寄送這筆訂單，不會提供給其他人；如需查詢或刪除你的資料，請聯絡第二組。</p>
           </form>
         </div>
 
@@ -799,7 +801,8 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
       qty: PRODUCTS.reduce(function(o,p){ o[p.n] = qty[p.id]; return o; }, {}),
       totalQty: t.lines.reduce(function(a,l){ return a + l.q; }, 0),
       subtotal: t.sub, shipFee: t.ship, total: t.grand,
-      note: f.note.value.trim()
+      note: f.note.value.trim(),
+      website: f.website.value
     };
     var btn = document.getElementById('submitBtn');
     btn.disabled = true; btn.textContent = '送出中…';
@@ -807,6 +810,9 @@ footer b{color:var(--gold);font-family:var(--font-display);font-size:1.1rem}
       .then(function(r){ return r.json(); })
       .then(function(res){
         if(!res || !res.ok) throw new Error(res && res.error ? res.error : '試算表沒有回應');
+        if(typeof res.total === 'number'){
+          rows.forEach(function(r){ if(r[0] === '總計') r[1] = money(res.total) + (t.ship ? '（含運費 ' + money(t.ship) + '）' : ''); });
+        }
         showDone(rows);
       })
       .catch(function(x){ err.textContent = '送出失敗：' + (x && x.message ? x.message : '請檢查網路後再試一次'); })
